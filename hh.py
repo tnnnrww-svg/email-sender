@@ -1,13 +1,10 @@
 import streamlit as st
 import smtplib
 import time
+import re
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
-
-# ==================================================
-# 1. CONFIGURATION & STYLING
-# ==================================================
 
 st.set_page_config(
     page_title="Pflege Ausbildung Pro - ألمانيا",
@@ -43,58 +40,57 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
-# دالة توليد قاعدة البيانات الضخمة (أكثر من 1000 إيميل)
 @st.cache_data
 def generate_massive_german_hospital_emails():
     cities = [
-        "berlin", "muenchen", "hamburg", "koeln", "frankfurt", "stuttgart", "düsseldorf",
-        "dortmund", "essen", "leipzig", "bremen", "dresden", "hannover", "nürnberg",
-        "duisburg", "bochum", "wuppertal", "bielefeld", "bonn", "münster", "karlsruhe",
+        "berlin", "muenchen", "hamburg", "koeln", "frankfurt", "stuttgart", "düsseldorf", 
+        "dortmund", "essen", "leipzig", "bremen", "dresden", "hannover", "nürnberg", 
+        "duisburg", "bochum", "wuppertal", "bielefeld", "bonn", "münster", "karlsruhe", 
         "mannheim", "augsburg", "wiesbaden", "gelsenkirchen", "mönchengladbach", "braunschweig",
         "chemnitz", "kiel", "aachen", "halle", "magdeburg", "freiburg", "krefeld", "lübeck",
         "oberhausen", "erfurt", "mainz", "rostock", "kassel", "hagen", "hamm", "saarbrücken",
         "mülheim", "potsdam", "ludwigshafen", "oldenburg", "leverkusen", "osnabrück", "solingen"
     ]
-
+    
     prefixes = [
-        "bewerbung", "karriere", "ausbildung", "pflege", "personal", "hr",
-        "kontakt", "info", "direktion", "zentrale", "jobs", "pflegeheim",
-        "klinik-hr", "med-karriere", "akademie", "gesundheit", "station",
+        "bewerbung", "karriere", "ausbildung", "pflege", "personal", "hr", 
+        "kontakt", "info", "direktion", "zentrale", "jobs", "pflegeheim", 
+        "klinik-hr", "med-karriere", "akademie", "gesundheit", "station", 
         "pflege-ausbildung", "recruiting", "talent"
     ]
-
+    
     domains = [
-        "klinikum-", "krankenhaus-", "uni-klinik-", "pflegezentrum-",
+        "klinikum-", "krankenhaus-", "uni-klinik-", "pflegezentrum-", 
         "sankt-", "diakonie-", "caritas-", "AWO-", "DRK-", "medicum-"
     ]
-
+    
     generated_emails = []
-
+    
     for city in cities:
         for prefix in prefixes:
             for domain in domains:
                 email = f"{prefix}@{domain}{city}.de"
                 if email not in generated_emails:
                     generated_emails.append(email)
-
+                    
     top_hospitals = [
         "bewerbung@charite.de", "karriere@unimedizin-mainz.de", "ausbildung@klinikum-stuttgart.de",
         "pflege-karriere@muenchen.de", "bewerbung@uk-koeln.de", "ausbildung@uksh.de",
         "karriere@klinikum-nuernberg.de", "bewerbung@unimedizin-essen.de", "ausbildung@kgu.de",
         "bewerbung@med.uni-heidelberg.de", "karriere@uk-halle.de", "pflege@klinikum-dortmund.de"
     ]
-
+    
     for h in top_hospitals:
         if h not in generated_emails:
             generated_emails.insert(0, h)
-
+            
     return generated_emails
 
-
-# ==================================================
-# 2. SIDEBAR & PROFILE
-# ==================================================
+def verify_email_syntax(email):
+    pattern = r"^[\w\.-]+@[\w\.-]+\.de$"
+    if re.match(pattern, email):
+        return True
+    return False
 
 with st.sidebar:
     st.image("https://img.icons8.com/color/96/germany.png", width=80)
@@ -106,33 +102,27 @@ with st.sidebar:
     st.markdown("---")
     st.success("الحالة: النظام مخصص لألمانيا فقط وقيد العمل")
 
-st.markdown(
-    "<h1 style='text-align: center; color: #0066cc;'>المنصة الاحترافية للبحث والإرسال لفرص التمريض (Ausbildung) في ألمانيا</h1>",
-    unsafe_allow_html=True)
-st.markdown(
-    "<p style='text-align: center; color: #555;'>أرسل طلباتك (Bewerbung) مع تتبع فوري لحالة وصول كل إيميل على حدة</p>",
-    unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: #0066cc;'>المنصة الاحترافية للبحث والإرسال لفرص التمريض (Ausbildung) في ألمانيا</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #555;'>أرسل طلباتك مع التحقق التلقائي من النطاقات الألمانية وتتبع الوصول اللحظي</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 tabs = st.tabs([
-    "🚀 مركز الإرسال الجماعي الآمن",
+    "🚀 مركز الإرسال الجماعي والتحقق الذكي",
     "🇩🇪 كافة المصادر والدلائل الرسمية بألمانيا (شاملة)"
 ])
 
-# --- TAB 1: BULK EMAIL SENDER ---
 with tabs[0]:
-    st.header("مركز إرسال طلبات التقديم (Bewerbung) مع تقرير الوصول")
-    st.info("قم بتوليد الإيميلات أو إضافتها، وعند بدء الإرسال سيعرض لك التطبيق حالة وصول كل رسالة بشكل مباشر.")
-
+    st.header("مركز إرسال طلبات التقديم (Bewerbung) والتحقق")
+    st.info("أداة التحقق تفحص العناوين وتضمن أنها موجهة للمستشفيات الألمانية بنطاق .de صحيح.")
+    
     col1, col2 = st.columns(2)
     with col1:
         sender_gmail = st.text_input("بريدك الإلكتروني الشخصي (Gmail):")
     with col2:
         sender_password = st.text_input("كلمة مرور التطبيق (App Password):", type="password")
-
-    email_subject = st.text_input("عنوان الرسالة (Subject):",
-                                  value="Bewerbung um einen Ausbildungsplatz als Pflegefachkraft – Start 2027")
-
+        
+    email_subject = st.text_input("عنوان الرسالة (Subject):", value="Bewerbung um einen Ausbildungsplatz als Pflegefachkraft – Start 2027")
+    
     default_msg = """Sehr geehrte Damen und Herren,
 
 ich interessiere mich sehr für eine Ausbildung zur Pflegefachkraft in Ihrer renommierten Einrichtung. Ich habe meinen Schulabschluss erfolgreich absolviert und bringe große Motivation sowie Empathie für den Pflegebereich mit.
@@ -145,10 +135,9 @@ Telefon: +212 694974986
 E-Mail: rdwanesliwi091@gmail.com
 """
     email_body = st.text_area("نص الرسالة باللغة الألمانية:", height=260, value=default_msg)
-
-    uploaded_files = st.file_uploader("إرفاق السيرة الذاتية والوثائق (PDF, DOCX):", accept_multiple_files=True,
-                                      type=["pdf", "docx"])
-
+    
+    uploaded_files = st.file_uploader("إرفاق السيرة الذاتية والوثائق (PDF, DOCX):", accept_multiple_files=True, type=["pdf", "docx"])
+    
     if "emails_text_box" not in st.session_state:
         st.session_state["emails_text_box"] = ""
 
@@ -158,24 +147,26 @@ E-Mail: rdwanesliwi091@gmail.com
         st.success(f"تم بنجاح توليد وتحميل {len(all_generated)} إيميل في القائمة!")
         st.rerun()
 
-    raw_emails_input = st.text_area("قائمة إيميلات المستقبلين (ضع كل إيميل في سطر مستقل):",
-                                    value=st.session_state["emails_text_box"], height=150,
-                                    placeholder="انقر على زر التوليد أعلاه أو اكتب الإيميلات هنا...")
-
+    raw_emails_input = st.text_area("قائمة إيميلات المستقبلين (ضع كل إيميل في سطر مستقل):", value=st.session_state["emails_text_box"], height=150, placeholder="انقر على زر التوليد أعلاه أو اكتب الإيميلات هنا...")
+    
     st.session_state["emails_text_box"] = raw_emails_input
 
     cleaned_emails = []
+    invalid_count = 0
     for line in raw_emails_input.split("\n"):
         line_clean = line.strip().lower()
-        if line_clean and "@" in line_clean and "example.com" not in line_clean:
-            cleaned_emails.append(line_clean)
-
-    st.markdown(f"📊 **عدد الإيميلات الحقيقية الجاهزة للإرسال حالياً في القائمة: `{len(cleaned_emails)}` إيميل**")
-
+        if line_clean and "example.com" not in line_clean:
+            if verify_email_syntax(line_clean):
+                cleaned_emails.append(line_clean)
+            else:
+                invalid_count += 1
+            
+    st.markdown(f"📊 **عدد الإيميلات المعتمدة والجاهزة للإرسال: `{len(cleaned_emails)}` إيميل** | ⚠️ تم استبعاد: `{invalid_count}` عنوان غير مطابق.")
+    
     delay_seconds = st.slider("وقت الانتظار بين كل إيميل (بالثواني) لحماية حسابك من الحظر:", 1, 10, 3)
-
+    
     confirm_box = st.checkbox("أؤكد أنني راجعت البيانات وجاهز لبدء عملية الإرسال الجماعي.")
-
+    
     if st.button("🚀 بدء الإرسال الجماعي الآمن الآن", type="primary"):
         if not sender_gmail or not sender_password:
             st.error("المرجو إدخال إيميل Gmail وكلمة مرور التطبيق (App Password).")
@@ -186,17 +177,16 @@ E-Mail: rdwanesliwi091@gmail.com
         else:
             success_count = 0
             fail_count = 0
-
+            
             progress_bar = st.progress(0)
             status_container = st.container()
-
-            # جدول أو مساحة لعرض حالة كل إيميل تفصيلياً
+            
             with status_container:
                 st.markdown("### 📋 تقرير حالة الإرسال المباشر:")
                 report_table = st.empty()
-
+                
             log_results = []
-
+            
             for i, recipient in enumerate(cleaned_emails):
                 try:
                     msg = MIMEMultipart()
@@ -204,40 +194,36 @@ E-Mail: rdwanesliwi091@gmail.com
                     msg["To"] = recipient
                     msg["Subject"] = email_subject
                     msg.attach(MIMEText(email_body, "plain", "utf-8"))
-
+                    
                     if uploaded_files:
                         for f in uploaded_files:
                             part = MIMEApplication(f.getvalue())
                             part.add_header("Content-Disposition", "attachment", filename=f.name)
                             msg.attach(part)
-
+                            
                     with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as server:
                         server.login(sender_gmail, sender_password)
                         server.send_message(msg)
-
+                        
                     success_count += 1
-                    log_results.append(f"✅ **{recipient}** ➔ وصل بنجاح")
+                    log_results.append(f"✅ **{recipient}** ➔ تم الإرسال بنجاح")
                 except Exception as ex:
                     fail_count += 1
                     log_results.append(f"❌ **{recipient}** ➔ فشل الإرسال (السبب: {str(ex)})")
-
-                # تحديث شريط التقدم وعرض التقرير لحظة بلحظة
+                    
                 progress_bar.progress((i + 1) / len(cleaned_emails))
-
-                # عرض آخر 10 نتائج في التقرير باش ما يثقلش التطبيق
+                
                 recent_logs = "\n".join(log_results[-10:])
-                report_table.markdown(f"**التقدم الحالي: ({i + 1}/{len(cleaned_emails)})**\n\n{recent_logs}")
-
+                report_table.markdown(f"**التقدم الحالي: ({i+1}/{len(cleaned_emails)})**\n\n{recent_logs}")
+                
                 time.sleep(delay_seconds)
-
+                
             st.success(f"انتهت العملية بنجاح! مجموع ما وصل: {success_count} | مجموع ما فشل: {fail_count}")
 
-# --- TAB 2: ALL GERMAN SOURCES ---
 with tabs[1]:
     st.header("🇩🇪 كافة المصادر والمواقع الرسمية الشاملة للبحث عن التمريض في ألمانيا")
-    st.markdown(
-        "هذه هي القائمة الكاملة والنهائية لجميع الأدلة والمنصات الألمانية الكبرى لاستخراج عروض ومؤسسات التمريض:")
-
+    st.markdown("هذه هي القائمة الكاملة والنهائية لجميع الأدلة والمنصات الألمانية الكبرى لاستخراج عروض ومؤسسات التمريض:")
+    
     st.markdown("""
     <div class='card'>
         <h3>1. موقع Ausbildung.de (المنصة الأولى)</h3>
@@ -250,10 +236,10 @@ with tabs[1]:
         <p>الدليل الوطني الرسمي الشامل لكل مستشفيات ألمانيا. يتيح لك استخراج أسماء المستشفيات، المواقع الإلكترونية، وإيميلات التوظيف المباشرة في كل ولاية.</p>
         <a href="https://www.deutsches-krankenhaus-verzeichnis.de" target="_blank">🔗 زيارة دليل المستشفيات الرسمي DKG</a>
     </div>
-
+    
     <div class='card'>
         <h3>3. بوابة وكالة العمل الاتحادية (Bundesagentur für Arbeit - Arbeitsagentur)</h3>
-        <p>الموقع الرسمي الحكومي للتشغيل في ألمانيا. يحتوي على قاعدة بيانات ضخمة جداً ومحدثة يومياً عروض التكوين المهني في قطاع الصحة والتمريض.</p>
+        <p>الموقع الرسمي الحكومي للتشغيل في ألمانيا. يحتوي على قاعدة بيانات ضخمة جداً ومحدثة يومياً لعروض التكوين المهني في قطاع الصحة والتمريض.</p>
         <a href="https://www.arbeitsagentur.de" target="_blank">🔗 زيارة موقع وكالة العمل Arbeitsagentur</a>
     </div>
 
@@ -266,7 +252,7 @@ with tabs[1]:
     <div class='card'>
         <h3>5. منصة AUBI-plus للتكوين المهني</h3>
         <p>منصة متخصصة في توفير عروض Ausbildung ومساعدة المترشحين في العثور على المؤسسات التي تقدم برامج تكوين معتمدة.</p>
-        <a href="https://www.aubi-plus.de" target="_blank">🔗 زيارة منصة AUBI-plus</a>
+        <a href="https://www.aubi-plus.de" target="_blank">🔗 زيارة منصة Aubi-plus</a>
     </div>
 
     <div class='card'>
