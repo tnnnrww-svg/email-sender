@@ -11,8 +11,8 @@ try:
 except Exception:
     API_KEY = ""
 
-st.title("🇩🇪 نظام أتمتة إرسال طلبات الشغل في ألمانيا (Bundesweit)")
-st.write("التحكم الكامل، تخصيص الرسائل، تتبع الحالة، والفحص التلقائي للردود الواردة.")
+st.title("🇩🇪 نظام أتمتة إرسال طلبات الشغل في ألمانيا (مجاني)")
+st.write("البحث التلقائي عن مؤسسات التمريض في ألمانيا وجلبها مجاناً وبكفاءة عالية.")
 
 # رفع السيرة الذاتية
 uploaded_file = st.file_uploader("1. ارفع سيرتك الذاتية (CV بصيغة PDF):", type=["pdf"])
@@ -21,7 +21,7 @@ target_city = st.text_input("أدخل اسم المدينة أو المنطقة 
 
 if st.button("🔍 ابحث وجلب 50 مؤسسة جديدة"):
     if not API_KEY:
-        st.error("❌ مفتاح OPENROUTER_API_KEY غير موجود في إعدادات Secrets في Streamlit Cloud. الرجاء إضافته.")
+        st.error("❌ مفتاح OPENROUTER_API_KEY غير موجود في إعدادات Secrets في Streamlit Cloud.")
     else:
         if not target_city:
             st.info("🔄 جاري جلب قائمة دقيقة تضم 50 مؤسسة تمريض في عموم ألمانيا (Bundesweit)...")
@@ -45,8 +45,9 @@ if st.button("🔍 ابحث وجلب 50 مؤسسة جديدة"):
             "Content-Type": "application/json"
         }
         
+        # استخدام نموذج مجاني تماماً
         scout_payload = {
-            "model": "deepseek/deepseek-chat",
+            "model": "google/gemini-flash-1.5",
             "messages": [{"role": "user", "content": scout_prompt}],
             "max_tokens": 4000
         }
@@ -56,18 +57,17 @@ if st.button("🔍 ابحث وجلب 50 مؤسسة جديدة"):
             
             if scout_response.status_code == 200:
                 ai_content = scout_response.json()['choices'][0]['message']['content']
-                # تنظيف الكود من ماركداون إن وجدت
                 if "```json" in ai_content:
                     ai_content = ai_content.split("```json")[1].split("```")[0].strip()
                 elif "```" in ai_content:
                     ai_content = ai_content.split("```")[1].split("```")[0].strip()
                 
                 companies = json.loads(ai_content)
-                st.success(f"✅ تم بنجاح جلب {len(companies)} مؤسسة طبية في ألمانيا!")
+                st.success(f"✅ تم بنجاح جلب {len(companies)} مؤسسة طبية في ألمانيا مجاناً!")
                 
-                # عرض الشركات كمثال
+                # عرض عينة من الشركات المجلبة
                 st.write(companies[:5])
             else:
-                st.error(f"❌ فشل الاتصال بالذكاء الاصطناعي لجلب الشركات. رمز الخطأ: {scout_response.status_code}")
+                st.error(f"❌ فشل الاتصال. رمز الخطأ: {scout_response.status_code}")
         except Exception as e:
             st.error(f"❌ حدث خطأ أثناء الاتصال: {e}")
